@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display&display=swap" rel="stylesheet">
+
+  <title>Guess My Number</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.3);
+      z-index: -1;
+    }
+
+    body {
+      min-height: 100vh;
+      background-image: url(guess-my-number-bg.jpg);
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+      backdrop-filter: blur(2.5px);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: sans-serif;
+    }
+
+    .head {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+
+    .heading {
+      font-family: 'Press Start 2P', cursive;
+      text-shadow: 2px 2px 15px black;
+    }
+
+    .btn,
+    .btnCheck {
+      background-color: rgba(0, 0, 0, 0.671);
+      color: whitesmoke;
+      text-shadow: 2px 2px 3px white;
+      border-radius: 6px;
+      box-shadow: 2px 2px 10px rgb(209, 209, 209);
+      border: 1px solid black;
+      cursor: pointer;
+    }
+
+    .btn {
+      padding: 4px;
+      width: 180px;
+      height: 40px;
+    }
+
+    .btnCheck {
+      background-color: black;
+      width: 120px;
+      height: 35px;
+      box-shadow: 1px 1px 5px white;
+    }
+
+    .btn:hover {
+      border: 1px solid white;
+    }
+
+    .mid {
+      font-family: 'Libre Baskerville', serif;
+      font-size: 3rem;
+      font-weight: bold;
+      color: white;
+      text-shadow: 2px 2px 8px black;
+    }
+
+    .info {
+      font-size: 1.2rem;
+      font-family: monospace;
+    }
+
+    .number {
+      width: 200px;
+      height: 35px;
+      font-size: 1.2rem;
+      text-align: center;
+      background-color: transparent;
+      color: white;
+      border: 1.5px solid black;
+      border-radius: 5px;
+      box-shadow: 2px 2px 8px rgb(0, 0, 0);
+    }
+
+    .number:hover {
+      background-color: white;
+      color: black;
+    }
+
+    main {
+      justify-content: center;
+      align-items: center;
+      gap: 3rem;
+      margin-top: 2rem;
+      text-align: center;
+    }
+
+    .right p {
+      line-height: 2;
+      font-size: 1.5rem;
+      text-shadow: 2px 2px 5px black;
+    }
+
+    .message {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 1rem;
+      line-height: 1.8;
+      color: #f5f5f5;
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    #guessField {
+      margin-bottom: 1.5rem;
+    }
+
+    .score,
+    .highscore {
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
+    }
+
+    #newGame {
+      margin-top: 20px;
+      font-size: 1rem;
+      padding: 8px 16px;
+      background-color: black;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+    }
+
+
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+</head>
+
+<body>
+  <header class="head">
+    <h1 class="heading">Guess My Number</h1>
+    <button type="reset" class="btn" id="resetGame">RESTART THE GAME!</button>
+    <p class="info">(Between 1 and 100)</p>
+    <p class="mid">?</p>
+  </header>
+  <main>
+    <section class="left">
+      <input type="number" class="number" id="guessField" /><br>
+      <button class="btnCheck" id="submitGuess">Submit Guess!</button>
+    </section>
+    <section class="right">
+      <p class="message">Start Guessing....</p>
+      <p class="score">💯 Your score : <span id="score">10</span></p>
+      <p class="highscore">⏳ Remaining Guesses : <span id="highscore">0</span></p>
+    </section>
+  </main>
+
+  <script>
+    let randomNumber = Math.floor(Math.random() * 100 + 1);
+    let score = 10;
+    let highscore = 0;
+    let playGame = true;
+
+    const guessInput = document.querySelector('#guessField');
+    const message = document.querySelector('.message');
+    const submit = document.querySelector('#submitGuess');
+    const reset = document.querySelector('#resetGame');
+    const scoreDisplay = document.querySelector('#score');
+    const highscoreDisplay = document.querySelector('#highscore');
+    const mid = document.querySelector('.mid');
+
+    submit.addEventListener('click', function (e) {
+      e.preventDefault();
+      if (!playGame) return;
+      const guess = parseInt(guessInput.value);
+      if (isNaN(guess) || guess < 1 || guess > 100) {
+        displayMessage('Invalid number!');
+        return;
+      }
+      checkGuess(guess);
+      guessInput.value = '';
+    });
+
+    reset.addEventListener('click', resetGame);
+
+    function checkGuess(guess) {
+      if (guess === randomNumber) {
+        displayMessage('🎉 Correct Number!');
+        mid.textContent = guess;
+        if (score > highscore) {
+          highscore = score;
+          highscoreDisplay.textContent = highscore;
+        }
+        playGame = false;
+      } else {
+        score--;
+        scoreDisplay.textContent = score;
+        if (score === 0) {
+          displayMessage(`💥 Game Over! Number was ${randomNumber}`);
+          playGame = false;
+        } else {
+          displayMessage(guess < randomNumber ? '📉 Too Low!' : '📈 Too High!');
+        }
+      }
+    }
+
+    function displayMessage(msg) {
+      message.textContent = msg;
+    }
+
+    function resetGame() {
+      score = 10;
+      randomNumber = Math.floor(Math.random() * 100 + 1);
+      playGame = true;
+      guessInput.value = '';
+      mid.textContent = '?';
+      scoreDisplay.textContent = score;
+      displayMessage('Start Guessing....');
+    }
+  </script>
+</body>
+
+</html>
